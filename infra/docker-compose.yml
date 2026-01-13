@@ -1,22 +1,27 @@
 services:
   postgres:
-    image: postgres:16
+    image: postgres:18
     container_name: mydrtv-postgres
     environment:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
     ports:
-      - "5432:5432"
+      - "55432:5432"
     volumes:
       - ./db-init.sql:/docker-entrypoint-initdb.d/01-init.sql
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql 
 
   rabbitmq:
-    image: rabbitmq:3-management
+    image: rabbitmq:4-management 
     container_name: mydrtv-rabbitmq
     ports:
       - "5672:5672"
       - "15672:15672"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
 
   identity:
     build:
@@ -48,7 +53,7 @@ services:
       - "8082:8080"
 
   ratings:
-    build:
+    build: 
       context: ..
       dockerfile: src/RatingsService/Dockerfile
     environment:
@@ -59,8 +64,8 @@ services:
       Jwt__Audience: mydrtv
       Jwt__Key: super-dev-only-change-me-please-32chars
     depends_on:
-      - postgres
       - rabbitmq
+      - postgres
       - identity
     ports:
       - "8083:8080"

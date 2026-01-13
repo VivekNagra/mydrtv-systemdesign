@@ -1,0 +1,93 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "RatingsService",
+    "version": "1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "RatingsService"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/ratings": {
+      "post": {
+        "tags": [
+          "RatingsService"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRatingRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/programmes/{programmeId}/ratings/summary": {
+      "get": {
+        "tags": [
+          "RatingsService"
+        ],
+        "parameters": [
+          {
+            "name": "programmeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CreateRatingRequest": {
+        "type": "object",
+        "properties": {
+          "programmeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "stars": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "review": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "RatingsService"
+    }
+  ]
+}

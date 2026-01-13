@@ -1,41 +1,51 @@
+using Microsoft.EntityFrameworkCore;
+using RecommendationService.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<RecsDbContext>(opt =>
+    opt.UseNpgsql(builder.Configuration.GetConnectionString("Db")));
+
+builder.Services.AddHttpClient("search", c =>
+{
+    c.BaseAddress = new Uri("http://search:8080");
+});
+
+builder.Services.AddHttpClient("ratings", c =>
+{
+    c.BaseAddress = new Uri("http://ratings:8080");
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+var logger = app.Logger;
+app.Use(async (ctx, next) =>
 {
-    app.MapOpenApi();
-}
+    var reqId = ctx.TraceIdentifier;
+    using (logger.BeginScope(new Dictionary<string, object?> { ["RequestId"] = reqId }))
+    {
+        logger.LogInformation("HTTP {Method} {Path}", ctx.Request.Method, ctx.Request.Path);
+        await next();
+    }
+});
 
-app.UseHttpsRedirection();
+app.UseSwagger();
+app.UseSwaggerUI();
 
-var summaries = new[]
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+
+// Demo endpoint: recommend based on a preferred genre + minRating
+// In presentation, you’ll explain that production would be based on events + user profiles.
+app.MapGet("/recommendations", async (string genre, double minRating, IHttpClientFactory http) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
-
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    logger.LogInformation("Fetching recommendations for genre {Genre} minRating {MinRating}", genre, minRating);
+    var search = http.CreateClient("search");
+    var url = $"/search?genre={Uri.EscapeDataString(genre)}&minRating={minRating}";
+    var results = await search.GetStringAsync(url);
+    return Results.Text(results, "application/json");
+});
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

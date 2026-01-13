@@ -1,0 +1,95 @@
+# Build output hanji
+bin/
+obj/
+/artifacts/
+
+# User-specific
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Logs / temp
+*.log
+logs/
+**/Properties/launchSettings.json
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NuGet
+*.nupkg
+packages/
+.nuget/packages/
+
+# Docker / tooling
+.dockerignore
+**/docker-compose.override.yml
+
+# Tooling state
+/.idea/
+.ionide/
+
+# .NET Core
+bin/
+obj/
+*.user
+*.suo
+.vs/
+packages/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+
+# IDEs
+.idea/
+.vscode/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Docker (uncomment if you have local overrides or volumes)
+# docker-compose.override.yml
+# .dockerignore (if not committed)
+
+# Database files (if using local SQLite or similar; your project uses PostgreSQL, so likely not needed)
+# *.db
+# *.sqlite
+# *.sqlite3
+
+# Temporary files
+*.tmp
+*.temp
+
+# Environment and secrets (if you add .env files)
+# .env
+# .env.local
+
+# Build and publish outputs
+publish/
+out/
+
+# Test results
+TestResults/
+*.trx
+
+# Rider
+.idea/
+
+# Visual Studio Code
+.vscode/
+
+# GitHub Actions (if workflows generate artifacts)
+# .github/workflows/*.log
