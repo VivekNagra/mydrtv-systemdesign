@@ -3,7 +3,7 @@
 - Alternativer:
   - Monolit: simplere drift/debug, men tæt kobling og sværere at ændre.
   - Modulær monolit: bedre grænser end monolit, men ingen løs kobling og ingen uafhængig skalering.
-- Hvorfor dette? Vil vise event-drevet integration og bounded contexts, men holde kompleksiteten lav (få services, simple flows).
+- Hvorfor dette? Jeg vil vise event-drevet integration og bounded contexts, men holde kompleksiteten lav (få services, simple flows).
 
 ## Systematisk tilgang: kriterier og fravalg
 **Kriterier for valg**
