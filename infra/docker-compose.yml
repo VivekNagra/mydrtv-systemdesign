@@ -1,0 +1,98 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: mydrtv-postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./db-init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - pgdata:/var/lib/postgresql/data
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: mydrtv-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  identity:
+    build:
+      context: ..
+      dockerfile: src/IdentityService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Db: Host=postgres;Port=5432;Database=identitydb;Username=postgres;Password=postgres
+      Jwt__Issuer: mydrtv
+      Jwt__Audience: mydrtv
+      Jwt__Key: super-dev-only-change-me-please-32chars
+    depends_on:
+      - postgres
+    ports:
+      - "8081:8080"
+
+  catalogue:
+    build:
+      context: ..
+      dockerfile: src/CatalogueService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Db: Host=postgres;Port=5432;Database=cataloguedb;Username=postgres;Password=postgres
+      RabbitMq__Host: rabbitmq
+    depends_on:
+      - postgres
+      - rabbitmq
+    ports:
+      - "8082:8080"
+
+  ratings:
+    build:
+      context: ..
+      dockerfile: src/RatingsService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Db: Host=postgres;Port=5432;Database=ratingsdb;Username=postgres;Password=postgres
+      RabbitMq__Host: rabbitmq
+      Jwt__Issuer: mydrtv
+      Jwt__Audience: mydrtv
+      Jwt__Key: super-dev-only-change-me-please-32chars
+    depends_on:
+      - postgres
+      - rabbitmq
+      - identity
+    ports:
+      - "8083:8080"
+
+  search:
+    build:
+      context: ..
+      dockerfile: src/SearchService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Db: Host=postgres;Port=5432;Database=searchdb;Username=postgres;Password=postgres
+      RabbitMq__Host: rabbitmq
+    depends_on:
+      - postgres
+      - rabbitmq
+    ports:
+      - "8084:8080"
+
+  recs:
+    build:
+      context: ..
+      dockerfile: src/RecommendationService/Dockerfile
+    environment:
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Db: Host=postgres;Port=5432;Database=recsdb;Username=postgres;Password=postgres
+      RabbitMq__Host: rabbitmq
+    depends_on:
+      - postgres
+      - rabbitmq
+      - search
+    ports:
+      - "8085:8080"
+
+volumes:
+  pgdata:

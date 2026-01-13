@@ -1,0 +1,5 @@
+CREATE DATABASE identitydb;
+CREATE DATABASE cataloguedb;
+CREATE DATABASE ratingsdb;
+CREATE DATABASE searchdb;
+CREATE DATABASE recsdb;
